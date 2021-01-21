@@ -1,0 +1,7 @@
+*.gbr
+*.drl
+*.*-bak
+*.zip
+*.pdf
+fp-info-cache
+

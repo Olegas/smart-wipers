@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name ST1S10PHR)(type Legacy)(uri /Users/oleg/work/smart-wipers/board/st1s10phr-Lib/ST1S10PHR.lib)(options "")(descr ""))
+  (lib (name SparkFun-FreqCtrl)(type Legacy)(uri /Users/oleg/work/smart-wipers/board/SparkFun-Kicad-Libraries/SparkFun-FreqCtrl.lib)(options "")(descr ""))
+)
