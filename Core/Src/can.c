@@ -21,7 +21,8 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "usart.h"
+#include "vehicle_state.h"
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -104,6 +105,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -135,6 +139,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    /* CAN2 interrupt Init */
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
   /* USER CODE BEGIN CAN2_MspInit 1 */
 
   /* USER CODE END CAN2_MspInit 1 */
@@ -161,6 +168,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
 
+    /* CAN1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */
@@ -183,6 +192,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
 
+    /* CAN2 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
   /* USER CODE BEGIN CAN2_MspDeInit 1 */
 
   /* USER CODE END CAN2_MspDeInit 1 */
@@ -190,7 +201,61 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void CAN_Error_Handler() {
+    Error_Handler();
+}
 
+void CAN_Init_Filter() {
+    CAN_FilterTypeDef filter;
+
+    filter.FilterBank = 0;
+    filter.FilterMode = CAN_FILTERMODE_IDLIST;
+    filter.FilterScale = CAN_FILTERSCALE_16BIT;
+    filter.FilterIdLow = TEMP_MSG_ID << 5;
+    filter.FilterMaskIdLow = ENGINE_STATUS_MSG_ID << 5;
+    filter.FilterIdHigh = 0x00;
+    filter.FilterMaskIdHigh = 0x00;
+    filter.FilterFIFOAssignment = CAN_RX_FIFO0;
+    filter.FilterActivation = ENABLE;
+
+    if (HAL_CAN_ConfigFilter(&LSCAN, &filter) != HAL_OK) {
+        CAN_Error_Handler();
+    }
+
+    if (HAL_CAN_Start(&LSCAN) != HAL_OK) {
+        CAN_Error_Handler();
+    }
+
+    if (HAL_CAN_ActivateNotification(&LSCAN, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+        CAN_Error_Handler();
+    }
+}
+
+uint8_t engine_status_from_can(uint8_t const* data) {
+    if (data[0] == 0x00) {
+        return ENGINE_STATUS_RUNNING;
+    } else if (data[0] == 0x20) {
+        return ENGINE_STATUS_IGNITION;
+    }
+    return ENGINE_STATUS_OFF;
+}
+
+
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hCAN) {
+    CAN_RxHeaderTypeDef header;
+    uint8_t data[8];
+
+    if (HAL_CAN_GetRxMessage(hCAN, CAN_RX_FIFO0, &header, data) != HAL_OK) {
+        CAN_Error_Handler();
+    }
+
+    if (header.StdId == ENGINE_STATUS_MSG_ID) {
+        update_engine_status(engine_status_from_can(data));
+    } else if (header.StdId == TEMP_MSG_ID) {
+        update_current_temp(((((data[1] & 0x03) << 8) + data[2]) / 8.0) - 40.0);
+    }
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -20,12 +20,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "can.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "vehicle_state.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,8 +91,13 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_USART1_UART_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LED_BOOT_GPIO_Port, LED_BOOT_Pin, GPIO_PIN_RESET);
+  CAN_Init_Filter();
+  HAL_TIM_Base_Start_IT(&htim2);
+  update_engine_status(ENGINE_STATUS_UNKNOWN);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -163,6 +169,10 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+      HAL_GPIO_WritePin(LED_BOOT_GPIO_Port, LED_BOOT_Pin, GPIO_PIN_SET);
+      HAL_Delay(500);
+      HAL_GPIO_WritePin(LED_BOOT_GPIO_Port, LED_BOOT_Pin, GPIO_PIN_RESET);
+      HAL_Delay(500);
   }
   /* USER CODE END Error_Handler_Debug */
 }
