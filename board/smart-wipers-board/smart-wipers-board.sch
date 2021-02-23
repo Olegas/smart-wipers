@@ -178,7 +178,7 @@ U 1 1 5FFEA909
 P 3250 1250
 F 0 "L1" V 3440 1250 50  0000 C CNN
 F 1 "CDRH6D38NP-3R3NC" V 3349 1250 50  0000 C CNN
-F 2 "Inductor_SMD:L_6.3x6.3_H3" H 3250 1250 50  0001 C CNN
+F 2 "Inductor_SMD:L_7.3x7.3_H3.5" H 3250 1250 50  0001 C CNN
 F 3 "~" H 3250 1250 50  0001 C CNN
 	1    3250 1250
 	0    -1   -1   0   
@@ -831,7 +831,7 @@ U 1 1 5FFDD438
 P 1000 3700
 F 0 "Y1" H 1000 3968 50  0000 C CNN
 F 1 "8Mhz" H 1000 3877 50  0000 C CNN
-F 2 "SparkFun-FreqCtrl:HC49US" H 1000 3700 50  0001 C CNN
+F 2 "Crystal:Crystal_SMD_5032-2Pin_5.0x3.2mm_HandSoldering" H 1000 3700 50  0001 C CNN
 F 3 "~" H 1000 3700 50  0001 C CNN
 	1    1000 3700
 	1    0    0    -1  
@@ -852,22 +852,11 @@ F 3 "~" H 1350 3450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:C C14
-U 1 1 5FFE00D6
-P 650 4000
-F 0 "C14" H 765 4046 50  0000 L CNN
-F 1 "20pF" H 765 3955 50  0000 L CNN
-F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 688 3850 50  0001 C CNN
-F 3 "~" H 650 4000 50  0001 C CNN
-	1    650  4000
-	1    0    0    -1  
-$EndComp
-$Comp
 L Device:C C15
 U 1 1 5FFE08AE
 P 1350 4000
 F 0 "C15" H 1465 4046 50  0000 L CNN
-F 1 "20pF" H 1465 3955 50  0000 L CNN
+F 1 "15pF" H 1465 3955 50  0000 L CNN
 F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 1388 3850 50  0001 C CNN
 F 3 "~" H 1350 4000 50  0001 C CNN
 	1    1350 4000
@@ -995,23 +984,23 @@ Text GLabel 9250 4400 0    50   Input ~ 0
 CAN_LSH
 Text GLabel 8200 5050 2    50   Input ~ 0
 CAN_GND
-Text GLabel 10650 4900 0    50   Input ~ 0
-CAN_GND
 Text GLabel 10650 5000 0    50   Input ~ 0
+CAN_GND
+Text GLabel 10650 4900 0    50   Input ~ 0
 CAN_LSH
-Text GLabel 10650 4400 0    50   Input ~ 0
-CAN_MSL
 Text GLabel 10650 4500 0    50   Input ~ 0
+CAN_MSL
+Text GLabel 10650 4400 0    50   Input ~ 0
 CAN_MSH
 Text GLabel 9750 5100 2    50   Input ~ 0
 CAN_12v
 $Comp
-L Connector_Generic:Conn_02x08_Odd_Even J10
+L Connector_Generic:Conn_02x08_Top_Bottom J10
 U 1 1 600545FC
 P 9450 4700
 F 0 "J10" H 9500 5217 50  0000 C CNN
 F 1 "XCAN" H 9500 5126 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical" H 9450 4700 50  0001 C CNN
+F 2 "Connector:OBD" H 9450 4700 50  0001 C CNN
 F 3 "~" H 9450 4700 50  0001 C CNN
 	1    9450 4700
 	1    0    0    -1  
@@ -1122,4 +1111,17 @@ Wire Wire Line
 	650  1250 1250 1250
 Wire Wire Line
 	650  1550 650  1900
+$Comp
+L Device:C C14
+U 1 1 5FFE00D6
+P 650 4000
+F 0 "C14" H 765 4046 50  0000 L CNN
+F 1 "15pF" H 765 3955 50  0000 L CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder" H 688 3850 50  0001 C CNN
+F 3 "~" H 650 4000 50  0001 C CNN
+	1    650  4000
+	1    0    0    -1  
+$EndComp
+Text Label 3200 1550 0    50   ~ 0
+FB
 $EndSCHEMATC
