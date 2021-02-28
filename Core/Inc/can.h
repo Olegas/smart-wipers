@@ -46,6 +46,7 @@ void MX_CAN2_Init(void);
 #define MSCAN hcan2
 
 void CAN_Init_Filter();
+void LSCAN_SendData(uint32_t id, uint8_t *data, uint8_t len);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

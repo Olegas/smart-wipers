@@ -23,6 +23,9 @@
 /* USER CODE BEGIN 0 */
 #include "usart.h"
 #include "vehicle_state.h"
+#include <stdio.h>
+#include <string.h>
+
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -202,59 +205,88 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
 /* USER CODE BEGIN 1 */
 void CAN_Error_Handler() {
-    Error_Handler();
+  Error_Handler();
 }
 
 void CAN_Init_Filter() {
-    CAN_FilterTypeDef filter;
+  CAN_FilterTypeDef filter;
 
-    filter.FilterBank = 0;
-    filter.FilterMode = CAN_FILTERMODE_IDLIST;
-    filter.FilterScale = CAN_FILTERSCALE_16BIT;
-    filter.FilterIdLow = TEMP_MSG_ID << 5;
-    filter.FilterMaskIdLow = ENGINE_STATUS_MSG_ID << 5;
-    filter.FilterIdHigh = 0x00;
-    filter.FilterMaskIdHigh = 0x00;
-    filter.FilterFIFOAssignment = CAN_RX_FIFO0;
-    filter.FilterActivation = ENABLE;
+  filter.FilterBank = 0;
+  filter.FilterMode = CAN_FILTERMODE_IDLIST;
+  filter.FilterScale = CAN_FILTERSCALE_16BIT;
+  filter.FilterIdLow = TEMP_MSG_ID << 5;
+  filter.FilterMaskIdLow = MOTION_MSG_ID << 5;
+  filter.FilterIdHigh = COLUMN_SWITCHES_MSG_ID << 5;
+  filter.FilterMaskIdHigh = 0x00;
+  filter.FilterFIFOAssignment = CAN_RX_FIFO0;
+  filter.FilterActivation = ENABLE;
 
-    if (HAL_CAN_ConfigFilter(&LSCAN, &filter) != HAL_OK) {
-        CAN_Error_Handler();
-    }
+  if (HAL_CAN_ConfigFilter(&LSCAN, &filter) != HAL_OK) {
+    CAN_Error_Handler();
+  }
 
-    if (HAL_CAN_Start(&LSCAN) != HAL_OK) {
-        CAN_Error_Handler();
-    }
+  if (HAL_CAN_Start(&LSCAN) != HAL_OK) {
+    CAN_Error_Handler();
+  }
 
-    if (HAL_CAN_ActivateNotification(&LSCAN, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
-        CAN_Error_Handler();
-    }
+  if (HAL_CAN_ActivateNotification(&LSCAN, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+    CAN_Error_Handler();
+  }
 }
 
-uint8_t engine_status_from_can(uint8_t const* data) {
-    if (data[0] == 0x00) {
-        return ENGINE_STATUS_RUNNING;
-    } else if (data[0] == 0x20) {
-        return ENGINE_STATUS_IGNITION;
-    }
-    return ENGINE_STATUS_OFF;
+uint8_t engine_status_from_can(uint8_t const *data) {
+  if (data[0] > 0x10) {
+    return ENGINE_STATUS_RUNNING;
+  }
+  return ENGINE_STATUS_OFF;
 }
 
-
+void report_packet(CAN_RxHeaderTypeDef header, uint8_t data[8]) {
+  char buffer[255];
+  sprintf(buffer,
+          "%03lX: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+          header.StdId,
+          data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, strlen(buffer), 100);
+}
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hCAN) {
-    CAN_RxHeaderTypeDef header;
-    uint8_t data[8];
+  CAN_RxHeaderTypeDef header;
+  uint8_t data[8];
 
-    if (HAL_CAN_GetRxMessage(hCAN, CAN_RX_FIFO0, &header, data) != HAL_OK) {
-        CAN_Error_Handler();
-    }
+  if (HAL_CAN_GetRxMessage(hCAN, CAN_RX_FIFO0, &header, data) != HAL_OK) {
+    CAN_Error_Handler();
+  }
 
-    if (header.StdId == ENGINE_STATUS_MSG_ID) {
-        update_engine_status(engine_status_from_can(data));
-    } else if (header.StdId == TEMP_MSG_ID) {
-        update_current_temp(((((data[1] & 0x03) << 8) + data[2]) / 8.0) - 40.0);
-    }
+  if (header.StdId == MOTION_MSG_ID) {
+#ifdef DEBUG_REPORT_MOTION
+    report_packet(header, data);
+#endif
+    update_engine_status(engine_status_from_can(data));
+  } else if (header.StdId == TEMP_MSG_ID) {
+    update_current_temp(((((data[1] & 0x03) << 8) + data[2]) / 8.0) - 40.0);
+  } else if (header.StdId == COLUMN_SWITCHES_MSG_ID) {
+#ifdef DEBUG_REPORT_STEERING_SWITCHES
+    report_packet(header, data);
+#endif
+    react_on_steering_wheel_switches(data);
+  }
+}
+
+
+void LSCAN_SendData(uint32_t id, uint8_t *data, uint8_t len) {
+  uint32_t mbox;
+  CAN_TxHeaderTypeDef header;
+  header.StdId = id;
+  header.ExtId = 0x00;
+  header.IDE = CAN_ID_STD;
+  header.DLC = len;
+  header.RTR = CAN_RTR_DATA;
+  header.TransmitGlobalTime = DISABLE;
+  HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&LSCAN, &header, data, &mbox);
+  if (status != HAL_OK) {
+    Error_Handler();
+  }
 }
 /* USER CODE END 1 */
 

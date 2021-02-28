@@ -26,7 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "vehicle_state.h"
+#include "vehicle_wipers.h"
+#include "vehicle_util.h"
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +48,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char *banner = "\n\n\nCarMod "
+    VERSION
+    " ready\nBuild date: "
+    __DATE__
+    "\n\n";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,15 +101,18 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LED_BOOT_GPIO_Port, LED_BOOT_Pin, GPIO_PIN_RESET);
-  CAN_Init_Filter();
+#ifdef DEBUG_REPORT_VEHICLE_STATE
+  HAL_UART_Transmit(&huart1, (uint8_t *)banner, strlen(banner), 100);
   HAL_TIM_Base_Start_IT(&htim2);
-  update_engine_status(ENGINE_STATUS_UNKNOWN);
+#endif
+  CAN_Init_Filter();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    park_wipers_if_needed();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -166,7 +175,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
+  // __disable_irq();
   while (1)
   {
       HAL_GPIO_WritePin(LED_BOOT_GPIO_Port, LED_BOOT_Pin, GPIO_PIN_SET);
