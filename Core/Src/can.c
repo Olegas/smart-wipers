@@ -277,14 +277,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hCAN) {
 void LSCAN_SendData(uint32_t id, uint8_t *data, uint8_t len) {
   uint32_t mbox;
   CAN_TxHeaderTypeDef header;
-  header.StdId = id;
-  header.ExtId = 0x00;
-  header.IDE = CAN_ID_STD;
-  header.DLC = len;
-  header.RTR = CAN_RTR_DATA;
-  header.TransmitGlobalTime = DISABLE;
-  HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&LSCAN, &header, data, &mbox);
-  if (status != HAL_OK) {
+  if (HAL_CAN_GetTxMailboxesFreeLevel(&LSCAN) != 0) {
+    header.StdId = id;
+    header.IDE = CAN_ID_STD;
+    header.DLC = len;
+    header.RTR = CAN_RTR_DATA;
+    header.TransmitGlobalTime = DISABLE;
+    HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&LSCAN, &header, data, &mbox);
+    if (status != HAL_OK) {
+      Error_Handler();
+    }
+  } else {
     Error_Handler();
   }
 }
