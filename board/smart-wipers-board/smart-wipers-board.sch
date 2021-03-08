@@ -935,7 +935,7 @@ Wire Wire Line
 	10800 5550 10800 5850
 Wire Wire Line
 	10800 5850 10250 5850
-Text GLabel 8200 4650 2    50   Input ~ 0
+Text GLabel 8200 4750 2    50   Input ~ 0
 CAN_12v
 Text GLabel 9250 4600 0    50   Input ~ 0
 CAN_MSH
@@ -998,7 +998,7 @@ F 3 "" H 8650 5650 50  0001 C CNN
 $EndComp
 NoConn ~ 8200 4950
 NoConn ~ 8200 4850
-Text GLabel 8200 4550 2    50   Input ~ 0
+Text GLabel 8200 4650 2    50   Input ~ 0
 CAN_GND
 Text GLabel 8200 4450 2    50   Input ~ 0
 CAN_GND
@@ -1262,7 +1262,7 @@ CAN_5v
 Wire Wire Line
 	8800 1200 8800 1250
 Connection ~ 8800 1250
-Text GLabel 8200 4750 2    50   Input ~ 0
+Text GLabel 8200 4550 2    50   Input ~ 0
 CAN_5v
 Text GLabel 7750 1850 3    50   Input ~ 0
 CAN_GND
