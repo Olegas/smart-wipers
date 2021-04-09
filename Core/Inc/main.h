@@ -64,6 +64,8 @@ void Error_Handler(void);
 #define LED_ACC_GPIO_Port GPIOA
 #define LED_LOWT_Pin GPIO_PIN_6
 #define LED_LOWT_GPIO_Port GPIOA
+#define SLOPE_CTL_Pin GPIO_PIN_7
+#define SLOPE_CTL_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
