@@ -3,6 +3,7 @@
 //
 
 #include "vehicle_state.h"
+#include "config.h"
 #include "tim.h"
 #include "usart.h"
 #include "vehicle_wipers.h"
@@ -58,7 +59,7 @@ void toggle_engine_led() {
 }
 
 void set_current_temp_led() {
-    if (current_temp < 4.0) {
+    if (current_temp < MAX_OUT_TEMP) {
         HAL_GPIO_WritePin(LED_LOWT_GPIO_Port, LED_LOWT_Pin, GPIO_PIN_RESET);
     } else {
         HAL_GPIO_WritePin(LED_LOWT_GPIO_Port, LED_LOWT_Pin, GPIO_PIN_SET);

@@ -36,7 +36,7 @@ void MX_CAN1_Init(void)
 {
 
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 60;
+  hcan1.Init.Prescaler = 21;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_4TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_12TQ;
@@ -58,7 +58,7 @@ void MX_CAN2_Init(void)
 {
 
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 21;
+  hcan2.Init.Prescaler = 60;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_4TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_12TQ;
@@ -230,6 +230,10 @@ void CAN_Init_Filter() {
   }
 
   if (HAL_CAN_ActivateNotification(&LSCAN, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+    CAN_Error_Handler();
+  }
+
+  if (HAL_CAN_Start(&MSCAN) != HAL_OK) {
     CAN_Error_Handler();
   }
 }

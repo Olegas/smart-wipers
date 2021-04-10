@@ -8,7 +8,7 @@
 #include "vehicle_util.h"
 #include <string.h>
 
-char *parkingWipersStr = "Parking wipers...";
+char *parkingWipersStr = "Parking wipers...\n";
 uint8_t need_park = 0;
 uint8_t pkt626_1[] = {0x00, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 uint8_t pkt625_1[] = {0x00, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -24,7 +24,7 @@ void park_wipers_if_needed() {
   if (need_park == 0) {
     return;
   }
-  beep(1, 1, 50);
+  beep(1, 1, 250);
   need_park = 0;
 #ifdef DEBUG_REPORT_VEHICLE_STATE
   HAL_UART_Transmit(&huart1, (uint8_t *) parkingWipersStr, strlen(parkingWipersStr), 100);
