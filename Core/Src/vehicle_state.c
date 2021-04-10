@@ -42,7 +42,7 @@ void report_vehicle_status_to_uart() {
           "Temp: %02.2f oC, engine: %s, wipers: %s\n",
           current_temp,
           strStatus,
-          wipers_was_used == 1 ? wipersWasUsed : wipersWasNotUsed);
+          wipers_was_used > 0 ? wipersWasUsed : wipersWasNotUsed);
   HAL_UART_Transmit(&huart1, (uint8_t *)buffer, strlen(buffer), 100);
 }
 
@@ -76,16 +76,28 @@ void update_current_temp(double new_temp) {
 void react_on_steering_wheel_switches(uint8_t const *data) {
   if (data[1] > 0) {
     if (engine_status == ENGINE_STATUS_RUNNING) {
-      wipers_was_used = 1;
+      // 0 - не использовались
+      // 1 - махнули один раз (напрмиер вернули с парковки)
+      // 2 - пользовались дворниками (дальше не увеличиваем - нет нужды знать точное кол-во)
+      if (wipers_was_used < 2) {
+        wipers_was_used++;
+      }
     }
   }
 }
 
 void update_engine_status(uint8_t new_status) {
     if (engine_status != new_status) {
-        if (engine_status == ENGINE_STATUS_RUNNING && new_status == ENGINE_STATUS_OFF && wipers_was_used == 1) {
-          wipers_was_used = 0;
-          request_park();
+        if (engine_status == ENGINE_STATUS_RUNNING && new_status == ENGINE_STATUS_OFF) {
+          // Если дворниками пользовались...
+          if (wipers_was_used > 0) {
+            // Два раз и более - паркуем
+            if (wipers_was_used == 2) {
+              request_park();
+            }
+            // В любом случае сбрасываем счетчик при выключении двигателя
+            wipers_was_used = 0;
+          }
         }
         engine_status = new_status;
         set_engine_status_led();
