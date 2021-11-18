@@ -106,9 +106,7 @@ void update_engine_status(uint8_t new_status) {
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    if(htim->Instance == TIM1) {
-        toggle_engine_led();
-    } else if (htim->Instance == TIM2) {
+    if (htim->Instance == TIM2) {
         report_vehicle_status_to_uart();
     }
 }
